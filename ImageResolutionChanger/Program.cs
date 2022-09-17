@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -11,15 +12,26 @@ namespace ImageResolutionChanger
 {
     class Program
     {
-        private const float STEP_OF_COMPRESSION = 0.1f;
         private const decimal MAX_FILE_SIZE_PNG = 8388608;
-        private const int BATCH_SIZE = 30;
-        private const string DESTINATION_FOLDER_NAME = "Discord formatted";
 
         private static ulong filesCount = 0;
 
+        private static float STEP_OF_COMPRESSION;
+        private static int BATCH_SIZE;
+        private static int MAX_DEGREE_OF_PARALLELISM;
+        private static string DESTINATION_FOLDER_NAME;
+
         static void Main(string[] args)
         {
+            var batchSizeConversion = int.TryParse(ConfigurationManager.AppSettings["BATCH_SIZE"], out int batchSizeConversionResult);
+            BATCH_SIZE = batchSizeConversion ? batchSizeConversionResult : 5;
+            var stepOfCompressionConversion = float.TryParse(ConfigurationManager.AppSettings["STEP_OF_COMPRESSION"], out float stepOfCompressionConversionResult);
+            STEP_OF_COMPRESSION = stepOfCompressionConversion ? stepOfCompressionConversionResult : 0.1f;
+            var destinationFolder = ConfigurationManager.AppSettings["DESTINATION_FOLDER_NAME"];
+            DESTINATION_FOLDER_NAME = !string.IsNullOrWhiteSpace(destinationFolder) ? destinationFolder : "Compressed";
+            var maxDegreeOfParallelismConversion = int.TryParse(ConfigurationManager.AppSettings["MAX_DEGREE_OF_PARALLELISM"], out int maxDegreeOfParallelismConversionResult);
+            MAX_DEGREE_OF_PARALLELISM = maxDegreeOfParallelismConversion ? maxDegreeOfParallelismConversionResult : 1;
+
             Console.WriteLine("Please enter the path to folder with images:");
             var path = Console.ReadLine();
 
@@ -73,7 +85,7 @@ namespace ImageResolutionChanger
         {
             var result = new Dictionary<string, Bitmap>();
 
-            Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = 4 }, (file) =>
+            Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = MAX_DEGREE_OF_PARALLELISM }, (file) =>
             {
                 try
                 {
