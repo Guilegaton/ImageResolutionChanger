@@ -16,6 +16,8 @@ namespace ImageResolutionChanger
         private const int BATCH_SIZE = 30;
         private const string DESTINATION_FOLDER_NAME = "Discord formatted";
 
+        private static ulong filesCount = 0;
+
         static void Main(string[] args)
         {
             Console.WriteLine("Please enter the path to folder with images:");
@@ -73,53 +75,60 @@ namespace ImageResolutionChanger
 
             Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = 4 }, (file) =>
             {
-                var image = Image.FromFile(file);
-                var levelOfCompression = 0;
-
-                while (true)
+                try
                 {
-                    var compression = levelOfCompression * STEP_OF_COMPRESSION + 1;
-                    var width = (int)Math.Abs(image.Width / compression);
-                    var hieght = (int)Math.Abs(image.Height / compression);
-                    var destRect = new Rectangle(0, 0, width, hieght);
-                    var destImage = new Bitmap(width, hieght);
+                    var image = Image.FromFile(file);
+                    var levelOfCompression = 0;
 
-                    destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-                    using (var graphics = Graphics.FromImage(destImage))
+                    while (true)
                     {
-                        graphics.CompositingMode = CompositingMode.SourceOver;
-                        graphics.CompositingQuality = CompositingQuality.Default;
-                        graphics.InterpolationMode = InterpolationMode.Default;
-                        graphics.SmoothingMode = SmoothingMode.Default;
-                        graphics.PixelOffsetMode = PixelOffsetMode.Default;
+                        var compression = levelOfCompression * STEP_OF_COMPRESSION + 1;
+                        var width = (int)Math.Abs(image.Width / compression);
+                        var hieght = (int)Math.Abs(image.Height / compression);
+                        var destRect = new Rectangle(0, 0, width, hieght);
+                        var destImage = new Bitmap(width, hieght);
 
-                        using (var wrapMode = new ImageAttributes())
+                        destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+                        using (var graphics = Graphics.FromImage(destImage))
                         {
-                            wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                            graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                            graphics.CompositingMode = CompositingMode.SourceOver;
+                            graphics.CompositingQuality = CompositingQuality.Default;
+                            graphics.InterpolationMode = InterpolationMode.Default;
+                            graphics.SmoothingMode = SmoothingMode.Default;
+                            graphics.PixelOffsetMode = PixelOffsetMode.Default;
+
+                            using (var wrapMode = new ImageAttributes())
+                            {
+                                wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                                graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                            }
+                        }
+
+                        long fileSize = 0;
+                        using (var stream = new MemoryStream())
+                        {
+                            destImage.Save(stream, ImageFormat.Png);
+                            fileSize = stream.Length;
+                        }
+
+                        if (fileSize < MAX_FILE_SIZE_PNG)
+                        {
+                            var fileName = file.Split('\\').Last();
+                            result.Add(fileName, destImage);
+                            Console.WriteLine($"{fileName} processed. Total processed files count: {++filesCount}");
+                            break;
+                        }
+                        else
+                        {
+                            levelOfCompression++;
+                            continue;
                         }
                     }
-
-                    long fileSize = 0;
-                    using (var stream = new MemoryStream())
-                    {
-                        destImage.Save(stream, ImageFormat.Png);
-                        fileSize = stream.Length;
-                    }
-
-                    if (fileSize < MAX_FILE_SIZE_PNG)
-                    {
-                        var fileName = file.Split('\\').Last();
-                        result.Add(fileName, destImage);
-                        Console.WriteLine($"{fileName} processed. Total processed files count: {result.Count}");
-                        break;
-                    }
-                    else
-                    {
-                        levelOfCompression++;
-                        continue;
-                    }
+                }
+                catch
+                {
+                    Console.WriteLine($"{file} was skipped");
                 }
             });
 
