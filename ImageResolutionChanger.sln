@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageResolutionChanger", "ImageResolutionChanger\ImageResolutionChanger.csproj", "{48446FA4-D7C1-4FAB-B206-085269D24F7B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{48446FA4-D7C1-4FAB-B206-085269D24F7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48446FA4-D7C1-4FAB-B206-085269D24F7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48446FA4-D7C1-4FAB-B206-085269D24F7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48446FA4-D7C1-4FAB-B206-085269D24F7B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {528D753D-B6E3-4AAF-AD20-BC5B025EDFCC}
+	EndGlobalSection
+EndGlobal
